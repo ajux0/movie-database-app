@@ -1,43 +1,32 @@
 import {
   PaginationContainer,
-  PaginationButton,
+  PrevButton,
+  NextButton,
   PageNumber,
 } from './styledComponents'
 
-const Pagination = ({page, setPage, totalPages}) => {
-  const onClickPrevious = () => {
+const Pagination = ({page, setPage}) => {
+  const onClickPrev = () => {
     if (page > 1) {
-      setPage(page - 1)
+      setPage(prevPage => prevPage - 1)
     }
   }
 
   const onClickNext = () => {
-    if (page < totalPages) {
-      setPage(page + 1)
-    }
+    setPage(prevPage => prevPage + 1)
   }
 
   return (
     <PaginationContainer>
-      <PaginationButton
-        type="button"
-        onClick={onClickPrevious}
-        disabled={page === 1}
-      >
-        Previous
-      </PaginationButton>
+      <PrevButton type="button" onClick={onClickPrev} disabled={page === 1}>
+        Prev
+      </PrevButton>
 
-      <PageNumber>
-        Page {page} of {totalPages}
-      </PageNumber>
+      <PageNumber>{page}</PageNumber>
 
-      <PaginationButton
-        type="button"
-        onClick={onClickNext}
-        disabled={page === totalPages}
-      >
+      <NextButton type="button" onClick={onClickNext}>
         Next
-      </PaginationButton>
+      </NextButton>
     </PaginationContainer>
   )
 }

@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useState} from 'react'
+import {useEffect, useState} from 'react'
 
 import MovieGrid from '../../components/MovieGrid'
 import Loader from '../../components/Loader'
@@ -10,61 +10,67 @@ import {PageContainer, PageTitle} from './styledComponents'
 
 const UpcomingMovies = () => {
   const [movies, setMovies] = useState([])
-  const [totalPages, setTotalPages] = useState(1)
   const [page, setPage] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
 
-  const fetchMovies = useCallback(async () => {
-    setIsLoading(true)
-    setHasError(false)
+  useEffect(() => {
+    const fetchMovies = async () => {
+      setIsLoading(true)
+      setHasError(false)
 
-    try {
-      const data = await getUpcomingMovies(page)
+      try {
+        const data = await getUpcomingMovies(page)
 
-      if (data.results) {
-        setMovies(data.results)
-        setTotalPages(data.total_pages || 1)
-      } else {
+        if (data && data.results) {
+          setMovies(data.results)
+        } else {
+          setHasError(true)
+        }
+      } catch (error) {
         setHasError(true)
+      } finally {
+        setIsLoading(false)
       }
-    } catch (error) {
-      setHasError(true)
-    } finally {
-      setIsLoading(false)
     }
+
+    fetchMovies()
   }, [page])
 
-  useEffect(() => {
-    fetchMovies()
-  }, [fetchMovies])
-
   const onRetry = () => {
+    const fetchMovies = async () => {
+      setIsLoading(true)
+      setHasError(false)
+
+      try {
+        const data = await getUpcomingMovies(page)
+
+        if (data && data.results) {
+          setMovies(data.results)
+        } else {
+          setHasError(true)
+        }
+      } catch (error) {
+        setHasError(true)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
     fetchMovies()
-  }
-
-  const renderContent = () => {
-    if (isLoading) {
-      return <Loader />
-    }
-
-    if (hasError) {
-      return <FailureView onRetry={onRetry} />
-    }
-
-    return (
-      <>
-        <MovieGrid movies={movies} />
-
-        <Pagination page={page} setPage={setPage} totalPages={totalPages} />
-      </>
-    )
   }
 
   return (
     <PageContainer>
       <PageTitle>Upcoming</PageTitle>
-      {renderContent()}
+
+      {isLoading && <Loader />}
+
+      {!isLoading && hasError && <FailureView onRetry={onRetry} />}
+
+      {!isLoading && !hasError && <MovieGrid movies={movies} />}
+
+      {!hasError && <Pagination page={page} setPage={setPage} />}
     </PageContainer>
   )
 }
